@@ -1,0 +1,29 @@
+{
+  "parts_dir": "parts_raw",
+  "manifest": "parts_raw/parts_manifest.csv",
+  "processed_dir": "parts_processed",
+  "out_dir": "nested",
+
+  "scale": 6.0,
+  "kits": 10,
+
+  "sheet_w_mm": 2440,
+  "sheet_h_mm": 1220,
+  "part_spacing_mm": 6,
+  "sheet_margin_mm": 15,
+  "allow_rotate": true,
+
+  "default_hole_mm": 6.5,
+  "part_hole_overrides": {
+    "frame": 22.0
+  },
+
+  "hardware_per_kit": {
+    "M6x40 bolt": 40,
+    "M6 nyloc nut": 40,
+    "nylon shoulder bushing 6mm": 80,
+    "608ZZ bearing": 4,
+    "M8x120 crank rod": 1,
+    "crank handle (cut part)": 1
+  }
+}

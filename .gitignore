@@ -1,0 +1,10 @@
+# generated pipeline output
+parts_raw/
+parts_processed/
+nested/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
