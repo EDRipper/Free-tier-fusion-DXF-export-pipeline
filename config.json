@@ -13,18 +13,24 @@
   "sheet_margin_mm": 15,
   "allow_rotate": true,
 
-  "default_hole_mm": 6.5,
+  "label_height_mm": 12,
+  "label_layer": "LABEL",
+
+  "default_hole_mm": 13.0,
   "part_hole_overrides": {
     "Spur Gear 12 teeth": 8.0,
-    "driving gear": 8.0
+    "driving gear": 8.0,
+    "frame spacer": 22.0,
+    "spacer": 8.0
   },
 
   "hardware_per_kit": {
-    "M6x40 bolt": 40,
-    "M6 nyloc nut": 40,
-    "nylon shoulder bushing 6mm": 80,
-    "608ZZ bearing": 4,
-    "M8x120 crank rod": 1,
+    "F686ZZ flanged bearing (6x13x5) OR 6mm nylon flanged bushing": 90,
+    "M6 bolt (pivot pin, mixed lengths 30-50mm)": 45,
+    "M6 nyloc nut": 45,
+    "nylon washer / spacer M6": 120,
+    "608ZZ bearing (8x22x7) crankshaft": 6,
+    "8mm steel rod / M8 threaded rod (crankshaft)": 1,
     "crank handle (cut part)": 1
   }
 }
