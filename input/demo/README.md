@@ -1,17 +1,17 @@
-# Demo input — Fusion source
+# Demo input
 
-`beest-fusion-cache-backup.zip` is the Fusion 360 source for the strandbeest example: the top-level
-assembly (`_working` / `_FML`) plus every referenced component, as Fusion's local working-cache
-`.f3d` files.
+Two forms of the strandbeest input:
 
-**These raw cache files don't open standalone in Fusion** (the assembly references components by
-GUID). They're here as the archival source. To actually work from it:
+- **`parts_raw/`** — the **12 real flat parts** exported from Fusion by `fusion_export_dxf.py`
+  (Stage A): 8 leg links, 2 gears, 2 spacer plates, each a clean 1:1 mm outline + holes, plus
+  `parts_manifest.csv`. **This is the directly runnable pipeline input** — point `config.json`'s
+  `parts_dir` at it and run `py ../../pack_dxf.py` to reproduce the sheets in
+  [`../../output/demo`](../../output/demo).
 
-1. In Fusion, open the design (or a `.f3z` export of it — a `.f3z` is the portable, self-contained
-   format and is what you'd normally publish here).
-2. Run [`../../fusion_export_dxf.py`](../../fusion_export_dxf.py) (Stage A) to produce the per-part
-   DXFs that the pipeline consumes.
-3. Run `py ../../pack_dxf.py` to get scaled, hole-corrected, nested sheets.
+- **`beest-fusion-cache-backup.zip`** — the upstream Fusion source (assembly + all component
+  `.f3d` cache files) the parts were exported from. Archival; raw cache files don't open standalone
+  (a `.f3z` export is the portable format). Open the design in Fusion and run Stage A to regenerate
+  `parts_raw/` yourself.
 
-For a fully runnable, no-Fusion demo, see `make_test_parts.py` in the repo root, which generates
-synthetic parts that produce the output in [`../../output/demo`](../../output/demo).
+Round hardware (rods, pins, bearings, the crank) is intentionally **not** here — those are bought,
+not cut.

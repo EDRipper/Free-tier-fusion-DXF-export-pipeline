@@ -15,7 +15,8 @@
 
   "default_hole_mm": 6.5,
   "part_hole_overrides": {
-    "frame": 22.0
+    "Spur Gear 12 teeth": 8.0,
+    "driving gear": 8.0
   },
 
   "hardware_per_kit": {

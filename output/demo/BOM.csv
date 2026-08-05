@@ -1,10 +1,18 @@
 CUT PARTS,per_kit,kits,total,notes
-link_long,6,10,60,"9mm ply, scaled x6.0"
-link_short,6,10,60,"9mm ply, scaled x6.0"
-triangle,3,10,30,"9mm ply, scaled x6.0"
-frame,1,10,10,"9mm ply, scaled x6.0"
+spacer,3,10,30,"3mm ply, scaled x6.0"
+frame spacer,2,10,20,"3mm ply, scaled x6.0"
+Component19,6,10,60,"3mm ply, scaled x6.0"
+Spur Gear 12 teeth,3,10,30,"5mm ply, scaled x6.0"
+LinkE,6,10,60,"3mm ply, scaled x6.0"
+LinkF,6,10,60,"3mm ply, scaled x6.0"
+LinkJ,6,10,60,"3mm ply, scaled x6.0"
+LinkK,6,10,60,"3mm ply, scaled x6.0"
+driving gear,3,10,30,"5mm ply, scaled x6.0"
+LinkD,6,10,60,"3mm ply, scaled x6.0"
+LinkB,6,10,60,"3mm ply, scaled x6.0"
+LinkC,6,10,60,"3mm ply, scaled x6.0"
 
-SHEETS,,,2,2440x1220mm
+SHEETS,,,9,2440x1220mm
 
 HARDWARE,per_kit,kits,total,
 M6x40 bolt,40,10,400,
