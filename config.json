@@ -29,8 +29,8 @@
     "M6 bolt (pivot pin, mixed lengths 30-50mm)": 45,
     "M6 nyloc nut": 45,
     "nylon washer / spacer M6": 120,
-    "608ZZ bearing (8x22x7) crankshaft": 6,
-    "8mm steel rod / M8 threaded rod (crankshaft)": 1,
+    "608ZZ bearing (8x22x7) crankshaft/shafts": 6,
+    "8mm steel rod (1 crank/driving shaft + 2 fixed-point shafts)": 3,
     "crank handle (cut part)": 1
   }
 }

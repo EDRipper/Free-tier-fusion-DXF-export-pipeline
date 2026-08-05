@@ -24,11 +24,19 @@ Every leg joint is a **pivot**: links must rotate relative to each other around 
 friction (μ≈0.1–0.2, sticky at startup); ball bearings are *rolling* (μ≈0.002) — ~20–100× less drag,
 compounded across 40 joints, and worse for bushings at waist-scale loads. Ball bearings it is.
 
-### Bearing vs friction, per hole
-- **Leg-link holes → 13 mm** ball-bearing seats (rotate).
-- **Gear centres → 8 mm** friction fit onto the shaft (turn with it).
-- **Frame-spacer holes → 22 mm** 608 crankshaft-bearing seats. *(assumed — confirm)*
-- **Spacer holes → 8 mm** shaft pass-through. *(assumed — confirm)*
+### Bearing vs friction, per hole — NOT YET CONFIRMED
+The extracted outlines carry no signal for this (every hole was 4 mm), so the current sizes are a
+**guess by part type**, not derived from the mechanism. The reliable source is the **Fusion joints**:
+a Revolute joint at a hole ⇒ it rotates ⇒ bearing seat; a Rigid joint ⇒ friction fit. Until the
+exporter reads the joints (or you confirm per part), treat this table as provisional:
+
+- Leg-link holes → 13 mm ball-bearing seats *(guess: assumes both links rotate at every pivot)*
+- Gear centres → 8 mm friction fit onto the shaft *(guess)*
+- Frame-spacer holes → 22 mm 608 seats *(guess)*
+- Spacer holes → 8 mm shaft *(guess)*
+
+Per-hole truth can be supplied via `parts_raw/hole_roles.csv` (part, cx, cy, dia) — which the joint
+exporter will generate.
 
 ### Optional saving (same smoothness)
 Fixing one link per pivot to the pin (only its neighbour rotates on a bearing) **halves** the bearing
@@ -46,7 +54,7 @@ assembly order is locked; the simple "bearing in every hole" version below is fo
 | Pivot pins | **M6 bolts** 30–50 mm | — | 13 mm | ~270 | GAMMA/Hornbach/Praxis |
 | Pin caps | **M6 nyloc nuts** | — | — | ~270 | DIY store |
 | Spacing | **M6 nylon washers** | — | — | ~720 | DIY store |
-| Crank axle | **8 mm rod / M8 threaded rod** | — | 8/22 mm | ~6 | DIY store |
+| Shafts | **8 mm steel rod** — 1 crank/driving + 2 fixed-point shafts | — | 8/22 mm | 18 (3/kit) | DIY store |
 | Crank handle | cut plywood part | — | — | 6 | (cut) |
 
 Dutch terms: kogellager (bearing), bout (bolt), zelfborgende moer (nyloc), ring (washer),
