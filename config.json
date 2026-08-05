@@ -5,7 +5,7 @@
   "out_dir": "nested",
 
   "scale": 6.0,
-  "kits": 10,
+  "kits": 6,
 
   "sheet_w_mm": 2440,
   "sheet_h_mm": 1220,
