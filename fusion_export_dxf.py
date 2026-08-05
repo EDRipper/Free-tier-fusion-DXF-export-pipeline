@@ -1,15 +1,17 @@
-# Fusion 360 script (Stage A) — export each unique component's flat face as a DXF (1:1 mm)
-# and write parts_manifest.csv (part name, per-kit instance count, thickness).
+# Fusion 360 script (Stage A) — export every FLAT (plate-like) component as a DXF (1:1)
+# and write parts_manifest.csv. Round/3D parts (rods, pins, bearings, chunky handles) are
+# auto-skipped. Each part is sketched on its OWN flat face, so assembly layering / position /
+# axis-crossing does NOT matter — every part comes out as a clean 2D outline.
 #
-# HOW TO RUN (works in Fusion Personal):
-#   1. Open the beest design.
-#   2. Utilities tab -> ADD-INS -> Scripts and Add-Ins -> Scripts -> the "+" -> point at this file.
-#   3. Select it -> Run. It writes into ~/Desktop/beest-pipeline/parts_raw/.
-#   4. Then run  py pack_dxf.py  from the beest-pipeline folder.
+# RUN (works in Fusion Personal):
+#   1. STRONGLY recommended: File -> Save As -> a COPY (e.g. "beest-export"), run this THERE,
+#      so your master can't be touched. (The script also deletes the temp sketches it makes,
+#      so it leaves no trace even if run on the master — but a copy is belt-and-suspenders.)
+#   2. Set document units to mm (Document Settings) if they aren't already.
+#   3. Utilities -> ADD-INS -> Scripts and Add-Ins -> Scripts -> "+" -> point at this file -> Run.
+#   4. Check ~/Desktop/beest-pipeline/parts_raw/ : only flat parts + parts_manifest.csv + skipped.csv
 #
-# NOTE: this is the one stage I could not test outside Fusion. It follows the standard
-# API pattern (largest planar face -> sketch -> project -> saveAsDXF). If a part fails,
-# it's usually because the component has no single flat face (fix: pick the face manually).
+# Tune FLAT_MAX_THICKNESS_MM if a real flat part is skipped or a chunky part slips through.
 import adsk.core
 import adsk.fusion
 import traceback
@@ -17,29 +19,35 @@ import os
 import csv
 
 OUT_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "beest-pipeline", "parts_raw")
+FLAT_MAX_THICKNESS_MM = 40.0     # a "flat part" is thinner than this between its two big faces
+FLAT_AREA_RATIO = 0.85           # the two big faces must be ~equal area (front/back of a plate)
 
 
 def safe(name):
     return "".join(ch if (ch.isalnum() or ch in " _-") else "_" for ch in name).strip()
 
 
-def largest_planar_face(comp):
-    best, best_area = None, 0.0
+def find_flat_face(comp):
+    """Return (largest flat face, thickness_mm) if the component is plate-like, else (None, 0)."""
+    planar = []
     for body in comp.bRepBodies:
         for f in body.faces:
-            if f.geometry.objectType == adsk.core.Plane.classType() and f.area > best_area:
-                best, best_area = f, f.area
-    return best
-
-
-def thickness_mm(comp):
-    for body in comp.bRepBodies:
-        bb = body.boundingBox
-        dims = (bb.maxPoint.x - bb.minPoint.x,
-                bb.maxPoint.y - bb.minPoint.y,
-                bb.maxPoint.z - bb.minPoint.z)
-        return round(min(dims) * 10.0, 2)   # Fusion API is cm -> mm
-    return 0.0
+            if f.geometry.objectType == adsk.core.Plane.classType():
+                planar.append(f)
+    if len(planar) < 2:
+        return None, 0.0
+    planar.sort(key=lambda f: f.area, reverse=True)
+    top = planar[0]
+    n1 = top.geometry.normal
+    o1 = top.geometry.origin
+    for f in planar[1:]:
+        n2 = f.geometry.normal
+        if abs(abs(n1.dotProduct(n2)) - 1.0) < 1e-3 and f.area >= FLAT_AREA_RATIO * top.area:
+            v = o1.vectorTo(f.geometry.origin)
+            gap_mm = abs(v.dotProduct(n1)) * 10.0     # Fusion API cm -> mm
+            if 0.1 < gap_mm < FLAT_MAX_THICKNESS_MM:
+                return top, round(gap_mm, 2)
+    return None, 0.0
 
 
 def run(context):
@@ -54,7 +62,7 @@ def run(context):
         os.makedirs(OUT_DIR, exist_ok=True)
         root = design.rootComponent
 
-        # count instances per unique component
+        # count occurrences per unique component
         counts = {}
 
         def walk(occs):
@@ -64,25 +72,45 @@ def run(context):
 
         walk(root.occurrences)
 
-        exported = []
+        exported, skipped = [], []
         for comp in design.allComponents:
-            face = largest_planar_face(comp)
-            if not face:
+            if comp == root and comp.bRepBodies.count == 0:
                 continue
-            sk = comp.sketches.add(face)
-            sk.project(face)                       # outer boundary + holes -> sketch curves
-            path = os.path.join(OUT_DIR, safe(comp.name) + ".dxf")
-            sk.saveAsDXF(path)
-            exported.append(comp.name)
+            face, thick = find_flat_face(comp)
+            if not face:
+                if comp.bRepBodies.count > 0:
+                    skipped.append((comp.name, "not plate-like (rod/pin/3D part)"))
+                continue
+            try:
+                sk = comp.sketches.add(face)
+                sk.project(face)                       # outer boundary + holes
+                path = os.path.join(OUT_DIR, safe(comp.name) + ".dxf")
+                ok = sk.saveAsDXF(path)
+                sk.deleteMe()                          # clean up: leave the design untouched
+                if ok:
+                    exported.append((comp.name, thick))
+                else:
+                    skipped.append((comp.name, "saveAsDXF returned false"))
+            except Exception as e:
+                skipped.append((comp.name, "error: %s" % e))
 
+        exported_names = {n for n, _ in exported}
         with open(os.path.join(OUT_DIR, "parts_manifest.csv"), "w", newline="") as f:
             w = csv.writer(f)
             w.writerow(["part", "per_kit_qty", "thickness_mm"])
-            for comp in design.allComponents:
-                if comp.name in exported:
-                    w.writerow([safe(comp.name), counts.get(comp.name, 1), thickness_mm(comp)])
+            for name, thick in exported:
+                w.writerow([safe(name), counts.get(name, 1), thick])
+        with open(os.path.join(OUT_DIR, "skipped.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["component", "reason"])
+            for name, reason in skipped:
+                w.writerow([name, reason])
 
-        ui.messageBox("Exported %d parts to:\n%s\n\nNow run  py pack_dxf.py" % (len(exported), OUT_DIR))
+        ui.messageBox(
+            "Exported %d flat parts.\nSkipped %d non-flat components (see skipped.csv).\n\n%s\n\n"
+            "Now: check parts_raw/, then run  py pack_dxf.py"
+            % (len(exported), len(skipped), OUT_DIR)
+        )
     except:  # noqa
         if ui:
             ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
