@@ -1,24 +1,26 @@
 CUT PARTS,per_kit,kits,total,hole_mm,notes
-spacer,3,1,3,8,"3mm(model), x6.0"
-frame spacer,2,1,2,22,"3mm(model), x6.0"
+crank,1,1,1,per-hole,"3mm(model), x6.0"
+driving gear,3,1,3,per-hole,"5mm(model), x6.0"
+Spur Gear 12 teeth,3,1,3,per-hole,"5mm(model), x6.0"
+frame spacer,2,1,2,per-hole,"3mm(model), x6.0"
+spacer,3,1,3,per-hole,"3mm(model), x6.0"
 Component19,6,1,6,13,"3mm(model), x6.0"
-Spur Gear 12 teeth,3,1,3,8,"5mm(model), x6.0"
-LinkE,6,1,6,13,"3mm(model), x6.0"
-LinkF,6,1,6,13,"3mm(model), x6.0"
-LinkJ,6,1,6,13,"3mm(model), x6.0"
-LinkK,6,1,6,13,"3mm(model), x6.0"
-driving gear,3,1,3,8,"5mm(model), x6.0"
+LinkC,6,1,6,13,"3mm(model), x6.0"
 LinkD,6,1,6,13,"3mm(model), x6.0"
 LinkB,6,1,6,13,"3mm(model), x6.0"
-LinkC,6,1,6,13,"3mm(model), x6.0"
+LinkE,6,1,6,13,"3mm(model), x6.0"
+LinkF,6,1,6,13,"3mm(model), x6.0"
+LinkK,6,1,6,13,"3mm(model), x6.0"
+LinkJ,6,1,6,13,"3mm(model), x6.0"
 
 SHEETS,,,1,,2440x1220mm
 
 HARDWARE,per_kit,kits,total,,
-F686ZZ flanged bearing (6x13x5),90,1,90,,
-"M6 bolt (pivot pin, mixed lengths 30-50mm)",45,1,45,,
+F686ZZ bearing (6x13x5) - leg pivots,90,1,90,,
+6001ZZ bearing (12x28x8) - 12mm shaft supports,6,1,6,,
+M6 bolt 30-50mm - pivot pins,45,1,45,,
 M6 nyloc nut,45,1,45,,
-nylon washer / spacer M6,120,1,120,,
-608ZZ bearing (8x22x7),6,1,6,,
-8mm steel rod (1 crank + 2 fixed-point shafts),3,1,3,,
+nylon washer/spacer M6,120,1,120,,
+12mm steel rod - crankshaft,1,1,1,,
+6mm steel rod - crank pins + fixed-point shafts + handle,6,1,6,,
 crank handle (cut part),1,1,1,,
