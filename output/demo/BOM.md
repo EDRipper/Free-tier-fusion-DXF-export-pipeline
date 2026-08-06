@@ -18,7 +18,7 @@ everything else to **cut**.
 | Item | Size | Per kit | ×6 | ~€ total | Buy |
 |---|---|---|---|---|---|
 | **F686ZZ** flanged bearing — leg pivots | 6×13×5 mm | 90 | **540** | ~€200 | [amazon.nl](https://www.amazon.nl/s?k=F686ZZ+bearing) |
-| **6001ZZ** bearing — crankshaft supports | 12×28×8 mm | 4 | **24** | ~€40 | [amazon.nl](https://www.amazon.nl/s?k=6001ZZ+lager) |
+| **6001ZZ** bearing — 12 mm shaft supports (frame spacers + spacers) | 12×28×8 mm | 6 | **36** | ~€60 | [amazon.nl](https://www.amazon.nl/s?k=6001ZZ+lager) |
 | **M6 bolts** — pivot pins | 30–50 mm | 45 | **270** | ~€30 | [amazon.nl](https://www.amazon.nl/s?k=M6+bout+RVS) |
 | **M6 nyloc** nuts | M6 | 45 | **270** | ~€15 | [amazon.nl](https://www.amazon.nl/s?k=M6+zelfborgende+moer) |
 | **M6 nylon washers/spacers** | M6 | 120 | **720** | ~€25 | [amazon.nl](https://www.amazon.nl/s?k=M6+nylon+ring) |
@@ -32,12 +32,14 @@ everything else to **cut**.
 > Cost lever: 540× F686 is "a bearing in every pivot hole." Friction-fitting one link per pivot
 > halves it to ~270 (same rolling smoothness) — worth doing once the assembly order is fixed.
 
-## ⚠ Assumptions to confirm (each a 1-line edit in `hole_roles.csv`)
-- **Crank's small hole** set to 13 mm (bearing) — its real role is unconfirmed.
-- **Driving-gear centre** set to 12 mm (assumes pinion shaft = crankshaft dia). Adjust if the input
-  shaft is thinner.
-- **Spacer bearing hole** set to 13 mm (F686). If that spacer actually carries the 12 mm crankshaft,
-  it should be 28 mm.
+## Hole roles — all confirmed
+- Leg-link holes → 13 mm (F686 pivots) · frame-spacer top → 28 mm (6001) + other two → 6 mm friction
+- spacer → 28 mm (6001, the 12 mm shaft) + 6 mm friction pin · gear centres → 12 mm · driven-gear crank pin → 6 mm
+- crank handle hole → 6 mm friction · crank's 25 mm hole preserved
+
+**One quantity to verify:** the **12 mm rod** count assumes a single long crankshaft. If the driving
+gear runs on its own separate 12 mm shaft, add a second rod (and its 6001s) — a BOM quantity only,
+no hole-size change.
 
 ## The bearing/rod system
 - Leg pivots: **M6 bolt through F686 bearings**, one per rotating link hole (13 mm seat), nyloc-capped, nylon washers between.

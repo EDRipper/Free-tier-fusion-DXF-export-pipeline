@@ -1,5 +1,5 @@
 CUT PARTS,per_kit,kits,total,hole_mm,notes
-crank,1,6,6,13,"3mm(model), x6.0"
+crank,1,6,6,per-hole,"3mm(model), x6.0"
 driving gear,3,6,18,per-hole,"5mm(model), x6.0"
 Spur Gear 12 teeth,3,6,18,per-hole,"5mm(model), x6.0"
 frame spacer,2,6,12,per-hole,"3mm(model), x6.0"
@@ -17,7 +17,7 @@ SHEETS,,,6,,2440x1220mm
 
 HARDWARE,per_kit,kits,total,,
 F686ZZ bearing (6x13x5) - leg pivots,90,6,540,,
-6001ZZ bearing (12x28x8) - crankshaft supports,4,6,24,,
+6001ZZ bearing (12x28x8) - 12mm shaft supports (frame spacers + spacers),6,6,36,,
 M6 bolt 30-50mm - pivot pins,45,6,270,,
 M6 nyloc nut,45,6,270,,
 nylon washer/spacer M6,120,6,720,,
