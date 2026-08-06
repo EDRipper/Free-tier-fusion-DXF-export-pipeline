@@ -71,16 +71,28 @@ def fits(pw, ph, uw, uh, rot):
 
 # ---------- hole sizing (per-hole overrides win over per-part) ----------
 
-def process_part(infile, outfile, scale, default_dia, per_hole):
+def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol):
     doc = ezdxf.readfile(infile)
     doc.units = ezdxf.units.MM
     msp = doc.modelspace()
-    # snapshot each hole's ORIGINAL centre so per-hole overrides can be matched, then scale
+    # de-dupe coincident circles (robust hole capture projects top+bottom edge of each hole)
+    seen = set()
+    for c in list(msp.query("CIRCLE")):
+        key = (round(c.dxf.center.x, 2), round(c.dxf.center.y, 2), round(c.dxf.radius, 2))
+        if key in seen:
+            msp.delete_entity(c)
+        else:
+            seen.add(key)
+    # snapshot each circle's ORIGINAL centre + radius so we can (a) match per-hole overrides and
+    # (b) resize ONLY the through-holes (dia == src_dia), leaving other circles (e.g. the crank's
+    # 25mm hole, or any non-hole feature) as scaled outline.
     circles = list(msp.query("CIRCLE"))
-    orig = [(c, c.dxf.center.x, c.dxf.center.y) for c in circles]
+    orig = [(c, c.dxf.center.x, c.dxf.center.y, c.dxf.radius) for c in circles]
     for e in msp:
         e.transform(Matrix44.scale(scale, scale, 1.0))
-    for c, ox, oy in orig:
+    for c, ox, oy, orad in orig:
+        if abs(orad * 2.0 - src_dia) > tol:
+            continue                                   # not a through-hole -> leave as scaled
         dia = default_dia
         for (hx, hy, hd) in per_hole:
             if abs(hx - ox) < 0.3 and abs(hy - oy) < 0.3:
@@ -206,6 +218,8 @@ def main():
     spacing = float(cfg["part_spacing_mm"]); margin = float(cfg["sheet_margin_mm"])
     default_hole = float(cfg["default_hole_mm"])
     overrides = cfg.get("part_hole_overrides", {})
+    src_dia = float(cfg.get("hole_source_dia_mm", 4.0))
+    src_tol = float(cfg.get("hole_source_tol_mm", 0.6))
     allow_rotate = bool(cfg.get("allow_rotate", True))
     label_cap = float(cfg.get("label_height_mm", 0))
     label_layer = cfg.get("label_layer", "LABEL")
@@ -225,7 +239,7 @@ def main():
         # per-hole centres are matched in original (pre-scale) model coords inside process_part
         per_hole = hole_roles.get(name, [])
         outfile = os.path.join(proc_dir, name + ".dxf")
-        w, h = process_part(infile, outfile, scale, default_dia, per_hole)
+        w, h = process_part(infile, outfile, scale, default_dia, per_hole, src_dia, src_tol)
         part_dims[name] = (w, h)
         part_anchor[name] = compute_anchor(outfile)
         tag = "per-hole" if name in hole_roles else f"all={default_dia:g}mm"

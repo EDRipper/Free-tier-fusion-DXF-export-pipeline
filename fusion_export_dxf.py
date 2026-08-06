@@ -107,8 +107,19 @@ def run(context):
                     skipped.append((comp.name, "not a broad flat plate (rod/pin/3D part)"))
                 continue
             try:
+                # Project the flat FACE -> the solid's TRUE TRIMMED outline: rounded ends come
+                # through as arcs (not full circles), so nothing gets severed on the laser, plus
+                # the holes on that face. Then scan the body's edges for any full-circle (Circle3D)
+                # hole edges the face projection missed, so every hole lands.
                 sk = comp.sketches.add(face)
                 sk.project(face)
+                for body in comp.bRepBodies:
+                    for edge in body.edges:
+                        try:
+                            if edge.geometry.objectType == adsk.core.Circle3D.classType():
+                                sk.project(edge)
+                        except Exception:
+                            pass
                 path = os.path.join(OUT_DIR, safe(comp.name) + ".dxf")
                 ok = sk.saveAsDXF(path)
                 sk.deleteMe()

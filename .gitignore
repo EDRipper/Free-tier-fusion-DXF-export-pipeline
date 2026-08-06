@@ -3,6 +3,10 @@ parts_raw/
 parts_processed/
 nested/
 
+# scratch / debug
+raw_preview/
+frames/
+
 # python
 __pycache__/
 *.pyc
