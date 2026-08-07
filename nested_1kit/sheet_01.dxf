@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461260.5614814814
+2461260.570277778
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461260.561527778
+2461260.570324074
   9
 $TDUUPDATE
  40
@@ -933,11 +933,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{CF82F40B-ABF2-4232-88CE-CD512820B539}
+{6778D867-1E93-48C2-B2A5-7B5464876A7C}
   9
 $VERSIONGUID
   2
-{3814BBF2-FC85-4F13-BFF9-81224D7B5252}
+{F25C8238-FE32-4383-831A-EEE7294A4F9D}
   9
 $EXTNAMES
 290
@@ -2543,7 +2543,7 @@ AcDbText
  40
 10.734375
   1
-Component19
+Links h,i,g
  50
 90.0
  72
@@ -2727,7 +2727,7 @@ AcDbText
  40
 10.734375
   1
-Component19
+Links h,i,g
  50
 90.0
  72
@@ -2911,7 +2911,7 @@ AcDbText
  40
 10.734375
   1
-Component19
+Links h,i,g
  72
 1
  11
@@ -3093,7 +3093,7 @@ AcDbText
  40
 10.734375
   1
-Component19
+Links h,i,g
  50
 90.0
  72
@@ -3277,7 +3277,7 @@ AcDbText
  40
 10.734375
   1
-Component19
+Links h,i,g
  50
 90.0
  72
@@ -3461,7 +3461,7 @@ AcDbText
  40
 10.734375
   1
-Component19
+Links h,i,g
  50
 90.0
  72
@@ -31119,9 +31119,9 @@ AcDbText
  30
 0.0
  40
-7.5
+11.859375
   1
-Spur Gear 12 teeth
+driven gear
  72
 1
  11
@@ -58777,9 +58777,9 @@ AcDbText
  30
 0.0
  40
-7.5
+11.859375
   1
-Spur Gear 12 teeth
+driven gear
  72
 1
  11
@@ -86435,9 +86435,9 @@ AcDbText
  30
 0.0
  40
-7.5
+11.859375
   1
-Spur Gear 12 teeth
+driven gear
  72
 1
  11
@@ -157105,7 +157105,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-08-07T12:28:32.625099+00:00
+1.4.4 @ 2026-08-07T12:41:12.613020+00:00
   0
 DICTIONARYVAR
   5
@@ -157117,7 +157117,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-08-07T12:28:36.629855+00:00
+1.4.4 @ 2026-08-07T12:41:16.821292+00:00
   0
 ENDSEC
   0

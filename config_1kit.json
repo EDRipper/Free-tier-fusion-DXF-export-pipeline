@@ -16,6 +16,10 @@
   "hole_source_tol_mm": 0.6,
   "default_hole_mm": 22.0,
   "part_hole_overrides": {},
+  "rename": {
+    "Spur Gear 12 teeth": "driven gear",
+    "Component19": "Links h,i,g"
+  },
   "hardware_per_kit": {
     "608ZZ bearing (8x22x7) - all pivots + shaft supports": 96,
     "M8 bolt 30-50mm - pivot pins": 45,

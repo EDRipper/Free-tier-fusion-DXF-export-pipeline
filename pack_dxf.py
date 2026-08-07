@@ -259,6 +259,7 @@ def main():
     spacing = float(cfg["part_spacing_mm"]); margin = float(cfg["sheet_margin_mm"])
     default_hole = float(cfg["default_hole_mm"])
     overrides = cfg.get("part_hole_overrides", {})
+    rename = cfg.get("rename", {})
     src_dia = float(cfg.get("hole_source_dia_mm", 4.0))
     src_tol = float(cfg.get("hole_source_tol_mm", 0.6))
     allow_rotate = bool(cfg.get("allow_rotate", True))
@@ -282,7 +283,7 @@ def main():
         outfile = os.path.join(proc_dir, name + ".dxf")
         w, h = process_part(infile, outfile, scale, default_dia, per_hole, src_dia, src_tol)
         part_dims[name] = (w, h)
-        lbl = compute_label(outfile, name, label_cap) if label_cap > 0 else None
+        lbl = compute_label(outfile, rename.get(name, name), label_cap) if label_cap > 0 else None
         part_label[name] = lbl
         tag = "per-hole" if name in hole_roles else f"all={default_dia:g}mm"
         lt = f"label {lbl[2]:.0f}mm@{lbl[3]:.0f}deg" if lbl else "NO LABEL FITS"
@@ -321,7 +322,7 @@ def main():
             name, pw, ph = rid_map[r]
             rotated = (allow_rotate and abs(w - ph) < 0.5 and abs(h - pw) < 0.5
                        and not (abs(w - pw) < 0.5 and abs(h - ph) < 0.5))
-            place_instance(os.path.join(proc_dir, name + ".dxf"), name, rotated,
+            place_instance(os.path.join(proc_dir, name + ".dxf"), rename.get(name, name), rotated,
                            margin + x + spacing / 2.0, margin + y + spacing / 2.0,
                            doc, part_label[name], label_layer)
         out = os.path.join(out_dir, f"sheet_{b + 1:02d}.dxf")
@@ -334,7 +335,7 @@ def main():
         w.writerow(["CUT PARTS", "per_kit", "kits", "total", "hole_mm", "notes"])
         for name, info in manifest.items():
             hd = "per-hole" if name in hole_roles else f"{float(overrides.get(name, default_hole)):g}"
-            w.writerow([name, info["per_kit"], kits, info["per_kit"] * kits, hd,
+            w.writerow([rename.get(name, name), info["per_kit"], kits, info["per_kit"] * kits, hd,
                         f"{info['thickness']:g}mm(model), x{scale}"])
         w.writerow([])
         w.writerow(["SHEETS", "", "", len(sheet_files), "", f"{sheet_w:.0f}x{sheet_h:.0f}mm"])
