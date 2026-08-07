@@ -146,34 +146,74 @@ def _clearance(px, py, segs, holes):
     return best
 
 
-def compute_anchor(processed_file):
-    """Return (local_x, local_y, clearance) of the most solid point on the part."""
+def _box_fits(cx, cy, w, h, ang, segs, holes):
+    """True if an oriented rectangle (already margin-inflated) is fully inside the material and
+    clear of every hole — sampled on a grid over the box, so text can't cross a cut or a hole."""
+    ca, sa = math.cos(ang), math.sin(ang)
+    hw, hh = w / 2.0, h / 2.0
+    for u in (-hw, -hw * 0.66, -hw * 0.33, 0.0, hw * 0.33, hw * 0.66, hw):
+        for v in (-hh, 0.0, hh):
+            px = cx + u * ca - v * sa
+            py = cy + u * sa + v * ca
+            if not _inside(px, py, segs):
+                return False
+            for (hx, hy, r) in holes:
+                if math.hypot(px - hx, py - hy) < r:
+                    return False
+    return True
+
+
+def _anchors(bb, segs, holes, n=16):
+    """Interior sample points, best-clearance first."""
+    pts = []
+    for i in range(1, n):
+        px = bb.extmin.x + (bb.extmax.x - bb.extmin.x) * i / n
+        for j in range(1, n):
+            py = bb.extmin.y + (bb.extmax.y - bb.extmin.y) * j / n
+            if not _inside(px, py, segs):
+                continue
+            if any(math.hypot(px - hx, py - hy) < r for hx, hy, r in holes):
+                continue
+            pts.append((_clearance(px, py, segs, holes), px, py))
+    pts.sort(reverse=True)
+    return pts
+
+
+def _fits_h(ax, ay, name, h, arad, segs, holes, aspect, margin_frac):
+    m = h * margin_frac
+    return _box_fits(ax, ay, len(name) * h * aspect + 2 * m, h + 2 * m, arad, segs, holes)
+
+
+def compute_label(processed_file, name, max_h, min_h=3.0, aspect=0.68, margin_frac=0.35):
+    """Return (x, y, height, angle_deg) for a label whose whole bounding box FITS on the part
+    (no overlap with any cut line or hole). Runs text along the long axis; binary-searches the
+    largest fitting height at the best-clearance anchors. None if nothing fits."""
     doc = ezdxf.readfile(processed_file)
     msp = doc.modelspace()
     bb = bbox.extents(msp)
     segs = _segments(msp)
     holes = [(c.dxf.center.x, c.dxf.center.y, c.dxf.radius) for c in msp.query("CIRCLE")]
-    best_pt, best = None, -1.0
-    NX, NY = 24, 24
-    for i in range(1, NX):
-        px = bb.extmin.x + (bb.extmax.x - bb.extmin.x) * i / NX
-        for j in range(1, NY):
-            py = bb.extmin.y + (bb.extmax.y - bb.extmin.y) * j / NY
-            if not _inside(px, py, segs):
-                continue
-            if any(math.hypot(px - hx, py - hy) < r for hx, hy, r in holes):
-                continue
-            s = _clearance(px, py, segs, holes)
-            if s > best:
-                best, best_pt = s, (px, py)
-    if best_pt is None:
-        best_pt = ((bb.extmin.x + bb.extmax.x) / 2, (bb.extmin.y + bb.extmax.y) / 2)
-        best = 3.0
-    return best_pt[0], best_pt[1], best
+    prim = 0.0 if (bb.extmax.x - bb.extmin.x) >= (bb.extmax.y - bb.extmin.y) else 90.0
+    anchors = _anchors(bb, segs, holes)
+    if not anchors:
+        return None
+    for (_clr, ax, ay) in anchors[:12]:
+        for ang in (prim, (prim + 90.0) % 180.0):
+            arad = math.radians(ang)
+            if not _fits_h(ax, ay, name, min_h, arad, segs, holes, aspect, margin_frac):
+                continue                                   # can't even fit the smallest here
+            lo, hi, best = min_h, max_h, min_h            # binary-search the tallest that fits
+            for _ in range(6):
+                mid = (lo + hi) / 2.0
+                if _fits_h(ax, ay, name, mid, arad, segs, holes, aspect, margin_frac):
+                    best, lo = mid, mid
+                else:
+                    hi = mid
+            return ax, ay, best, ang
+    return None
 
 
-def place_instance(part_file, name, rotated, tx, ty, target_doc,
-                   anchor_local, clearance, label_cap, label_layer):
+def place_instance(part_file, name, rotated, tx, ty, target_doc, label, label_layer):
     src = ezdxf.readfile(part_file)
     ents = list(src.modelspace())
     rot = Matrix44.z_rotate(math.pi / 2) if rotated else None
@@ -187,16 +227,17 @@ def place_instance(part_file, name, rotated, tx, ty, target_doc,
     imp = Importer(src, target_doc)
     imp.import_entities(ents, target_doc.modelspace())
     imp.finalize()
-    # label at the transformed anchor, sized to fit the local clearance
-    ax, ay = anchor_local
+    if not label:
+        return
+    lx, ly, lh, langle = label
     if rot:
-        v = rot.transform(Vec3(ax, ay, 0))
-        ax, ay = v.x, v.y
-    ax, ay = ax + dx, ay + dy
-    hh = min(label_cap, clearance * 1.4)
-    if hh >= 2.0:
-        t = target_doc.modelspace().add_text(name, height=hh, dxfattribs={"layer": label_layer})
-        t.set_placement((ax, ay), align=TextEntityAlignment.MIDDLE_CENTER)
+        v = rot.transform(Vec3(lx, ly, 0))
+        lx, ly = v.x, v.y
+        langle = (langle + 90.0) % 180.0
+    lx, ly = lx + dx, ly + dy
+    t = target_doc.modelspace().add_text(
+        name, height=lh, dxfattribs={"layer": label_layer, "rotation": langle})
+    t.set_placement((lx, ly), align=TextEntityAlignment.MIDDLE_CENTER)
 
 
 def main():
@@ -230,7 +271,7 @@ def main():
     print(f"== Stage B: scale x{scale}; hole roles source: "
           f"{'hole_roles.csv (from joints)' if have_roles else 'per-part GUESS (no hole_roles.csv)'} ==")
 
-    part_dims, part_anchor = {}, {}
+    part_dims, part_label = {}, {}
     for name, info in manifest.items():
         infile = os.path.join(parts_dir, name + ".dxf")
         if not os.path.exists(infile):
@@ -241,9 +282,11 @@ def main():
         outfile = os.path.join(proc_dir, name + ".dxf")
         w, h = process_part(infile, outfile, scale, default_dia, per_hole, src_dia, src_tol)
         part_dims[name] = (w, h)
-        part_anchor[name] = compute_anchor(outfile)
+        lbl = compute_label(outfile, name, label_cap) if label_cap > 0 else None
+        part_label[name] = lbl
         tag = "per-hole" if name in hole_roles else f"all={default_dia:g}mm"
-        print(f"  {name:22s} {w:8.1f} x {h:8.1f} mm   holes:{tag}   x{info['per_kit'] * kits}")
+        lt = f"label {lbl[2]:.0f}mm@{lbl[3]:.0f}deg" if lbl else "NO LABEL FITS"
+        print(f"  {name:22s} {w:8.1f} x {h:8.1f} mm   holes:{tag}   {lt}   x{info['per_kit'] * kits}")
 
     print(f"== Stage C: nesting onto {sheet_w:.0f}x{sheet_h:.0f} sheets ==")
     packer = newPacker(rotation=allow_rotate)
@@ -278,10 +321,9 @@ def main():
             name, pw, ph = rid_map[r]
             rotated = (allow_rotate and abs(w - ph) < 0.5 and abs(h - pw) < 0.5
                        and not (abs(w - pw) < 0.5 and abs(h - ph) < 0.5))
-            ax, ay, clr = part_anchor[name]
             place_instance(os.path.join(proc_dir, name + ".dxf"), name, rotated,
                            margin + x + spacing / 2.0, margin + y + spacing / 2.0,
-                           doc, (ax, ay), clr, label_cap, label_layer)
+                           doc, part_label[name], label_layer)
         out = os.path.join(out_dir, f"sheet_{b + 1:02d}.dxf")
         doc.saveas(out); sheet_files.append(out)
         print(f"  sheet_{b + 1:02d}.dxf : {len(by_bin[b])} parts")
