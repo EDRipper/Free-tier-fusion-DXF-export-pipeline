@@ -3,33 +3,25 @@
   "manifest": "parts_raw/parts_manifest.csv",
   "processed_dir": "parts_processed",
   "out_dir": "nested_1kit",
-
   "scale": 6.0,
   "kits": 1,
-
   "sheet_w_mm": 2440,
   "sheet_h_mm": 1220,
   "part_spacing_mm": 6,
   "sheet_margin_mm": 15,
   "allow_rotate": true,
-
   "label_height_mm": 12,
   "label_layer": "LABEL",
-
   "hole_source_dia_mm": 4.0,
   "hole_source_tol_mm": 0.6,
-
-  "default_hole_mm": 13.0,
+  "default_hole_mm": 22.0,
   "part_hole_overrides": {},
-
   "hardware_per_kit": {
-    "F686ZZ bearing (6x13x5) - leg pivots": 90,
-    "6001ZZ bearing (12x28x8) - 12mm shaft supports": 6,
-    "M6 bolt 30-50mm - pivot pins": 45,
-    "M6 nyloc nut": 45,
-    "nylon washer/spacer M6": 120,
-    "12mm steel rod - crankshaft": 1,
-    "6mm steel rod - crank pins + fixed-point shafts + handle": 6,
+    "608ZZ bearing (8x22x7) - all pivots + shaft supports": 96,
+    "M8 bolt 30-50mm - pivot pins": 45,
+    "M8 nyloc nut": 45,
+    "nylon washer/spacer M8": 120,
+    "8mm steel rod - crankshaft + crank pins + fixed shafts + handle (cut to length)": 8,
     "crank handle (cut part)": 1
   }
 }
