@@ -4,13 +4,15 @@ Uniform **8 mm** hardware system: **two hole sizes only** — 22 mm (608 bearing
 (M8 rod / friction). Prices are rough EUR estimates; per-kit × 6. Links are Amazon.nl searches (NL).
 
 ## Cut parts
-13 unique parts, nested onto **6 sheets** of **9 mm birch plywood** (berken multiplex, 2440×1220).
-DXFs: `sheet_01.dxf … sheet_06.dxf`. Labels on the `LABEL` layer → set it to **score/engrave**,
-everything else to **cut**. One whole beest on one sheet: `../nested_1kit/`.
+13 unique parts, nested onto **13 sheets** of **9 mm birch plywood** (berken multiplex,
+**1200×1200 mm** — Snijlab's birch stock size). DXFs: `sheet_01.dxf … sheet_13.dxf`, already
+Snijlab-ready: **cut = blue** (layer `cut`, RGB 0,0,255), **engrave = red** (layer `line engraving`,
+RGB 255,0,0), text converted to outlines, DXF R2004, mm. One whole beest spans ~3 sheets:
+`../nested_1kit/`.
 
 | Item | Qty | Source |
 |---|---|---|
-| 9 mm birch plywood, 2440×1220 sheet | 6 | [Snijlab (supplies + laser-cuts)](https://snijlab.nl/en/collections/laser-cutting-of-plywood-and-plywood) · [GAMMA berken multiplex](https://www.gamma.nl/assortiment/zoeken?text=berken%20multiplex) |
+| 9 mm birch plywood, 1200×1200 sheet | 13 | [Snijlab birch ply (supplies + laser-cuts)](https://snijlab.nl/en/products/birch-plywood) · [GAMMA berken multiplex](https://www.gamma.nl/assortiment/zoeken?text=berken%20multiplex) |
 
 ## Hardware
 

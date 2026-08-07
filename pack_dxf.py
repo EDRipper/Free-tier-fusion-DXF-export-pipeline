@@ -26,10 +26,20 @@ from collections import defaultdict
 import ezdxf
 from ezdxf import bbox
 from ezdxf import path as ezpath
-from ezdxf.addons import Importer
+from ezdxf.addons import Importer, text2path
 from ezdxf.enums import TextEntityAlignment
 from ezdxf.math import Matrix44, Vec3
 from rectpack import newPacker
+
+try:
+    from ezdxf.fonts.fonts import FontFace
+except Exception:                       # older ezdxf layout
+    from ezdxf.tools.fonts import FontFace
+
+# Snijlab operation colours (RGB) — cut-through=blue, line-engrave=red
+CUT_RGB = (0, 0, 255)
+ENGRAVE_RGB = (255, 0, 0)
+_FONT = FontFace(family="Arial")
 
 
 def load_config(path):
@@ -132,7 +142,7 @@ def _apply_hull(msp, big_r):
 
 # ---------- hole sizing (per-hole overrides win over per-part) ----------
 
-def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol, hull=False):
+def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol, hull=False, kerf=0.0):
     doc = ezdxf.readfile(infile)
     doc.units = ezdxf.units.MM
     msp = doc.modelspace()
@@ -161,7 +171,8 @@ def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol, hu
             if abs(hx - ox) < 0.3 and abs(hy - oy) < 0.3:
                 dia = hd
                 break
-        c.dxf.radius = dia / 2.0
+        # kerf: interior holes cut ~one kerf oversize, so shrink the drawn diameter by the kerf
+        c.dxf.radius = max(0.1, (dia - kerf) / 2.0)
     doc.saveas(outfile)
     _, dims = bbox_of(list(msp))
     return dims
@@ -276,7 +287,27 @@ def compute_label(processed_file, name, max_h, min_h=3.0, aspect=0.68, margin_fr
     return None
 
 
-def place_instance(part_file, name, rotated, tx, ty, target_doc, label, label_layer):
+def _add_label_outlines(msp, text, lx, ly, h, angle, layer):
+    """Render label text as red outline paths (Snijlab wants text converted to outlines).
+    Falls back to a TEXT entity if font/text2path is unavailable."""
+    try:
+        paths = text2path.make_paths_from_str(
+            text, _FONT, size=h, align=TextEntityAlignment.MIDDLE_CENTER)
+        m = Matrix44.chain(Matrix44.z_rotate(math.radians(angle)),
+                           Matrix44.translate(lx, ly, 0))
+        paths = list(ezpath.transform_paths(paths, m))
+        pls = ezpath.render_lwpolylines(
+            msp, paths, dxfattribs={"layer": layer, "color": 1})
+        for pl in pls:
+            pl.rgb = ENGRAVE_RGB
+    except Exception:
+        t = msp.add_text(text, height=h,
+                         dxfattribs={"layer": layer, "color": 1, "rotation": angle})
+        t.rgb = ENGRAVE_RGB
+        t.set_placement((lx, ly), align=TextEntityAlignment.MIDDLE_CENTER)
+
+
+def place_instance(part_file, name, rotated, tx, ty, target_doc, label, label_layer, cut_layer):
     src = ezdxf.readfile(part_file)
     ents = list(src.modelspace())
     rot = Matrix44.z_rotate(math.pi / 2) if rotated else None
@@ -287,6 +318,12 @@ def place_instance(part_file, name, rotated, tx, ty, target_doc, label, label_la
     dx, dy = tx - bb.extmin.x, ty - bb.extmin.y
     for e in ents:
         e.transform(Matrix44.translate(dx, dy, 0))
+        e.dxf.layer = cut_layer                 # all part geometry -> Snijlab cut layer
+        try:
+            e.dxf.color = 5                     # ACI blue
+            e.rgb = CUT_RGB                      # exact RGB(0,0,255) for the uploader
+        except Exception:
+            pass
     imp = Importer(src, target_doc)
     imp.import_entities(ents, target_doc.modelspace())
     imp.finalize()
@@ -298,9 +335,7 @@ def place_instance(part_file, name, rotated, tx, ty, target_doc, label, label_la
         lx, ly = v.x, v.y
         langle = (langle + 90.0) % 180.0
     lx, ly = lx + dx, ly + dy
-    t = target_doc.modelspace().add_text(
-        name, height=lh, dxfattribs={"layer": label_layer, "rotation": langle})
-    t.set_placement((lx, ly), align=TextEntityAlignment.MIDDLE_CENTER)
+    _add_label_outlines(target_doc.modelspace(), name, lx, ly, lh, langle, label_layer)
 
 
 def main():
@@ -329,9 +364,11 @@ def main():
     rename = cfg.get("rename", {})
     src_dia = float(cfg.get("hole_source_dia_mm", 4.0))
     src_tol = float(cfg.get("hole_source_tol_mm", 0.6))
+    kerf = float(cfg.get("kerf_mm", 0.0))        # holes cut ~one kerf oversize -> shrink by this
     allow_rotate = bool(cfg.get("allow_rotate", True))
     label_cap = float(cfg.get("label_height_mm", 0))
-    label_layer = cfg.get("label_layer", "LABEL")
+    label_layer = cfg.get("label_layer", "line engraving")   # Snijlab line-engrave layer
+    cut_layer = cfg.get("cut_layer", "cut")                   # Snijlab cut-through layer
 
     usable_w = sheet_w - 2 * margin
     usable_h = sheet_h - 2 * margin
@@ -349,7 +386,7 @@ def main():
         per_hole = hole_roles.get(name, [])
         outfile = os.path.join(proc_dir, name + ".dxf")
         w, h = process_part(infile, outfile, scale, default_dia, per_hole, src_dia, src_tol,
-                            hull=(name in hull_parts))
+                            hull=(name in hull_parts), kerf=kerf)
         part_dims[name] = (w, h)
         lbl = compute_label(outfile, rename.get(name, name), label_cap) if label_cap > 0 else None
         part_label[name] = lbl
@@ -383,16 +420,17 @@ def main():
 
     sheet_files = []
     for b in sorted(by_bin):
-        doc = ezdxf.new(); doc.units = ezdxf.units.MM
+        doc = ezdxf.new(dxfversion="R2004"); doc.units = ezdxf.units.MM   # Snijlab: DXF 2004, mm
+        cl = doc.layers.add(cut_layer, color=5); cl.rgb = CUT_RGB          # cut-through = blue
         if label_cap > 0 and label_layer not in doc.layers:
-            doc.layers.add(label_layer, color=1)
+            el = doc.layers.add(label_layer, color=1); el.rgb = ENGRAVE_RGB  # line-engrave = red
         for (x, y, w, h, r) in by_bin[b]:
             name, pw, ph = rid_map[r]
             rotated = (allow_rotate and abs(w - ph) < 0.5 and abs(h - pw) < 0.5
                        and not (abs(w - pw) < 0.5 and abs(h - ph) < 0.5))
             place_instance(os.path.join(proc_dir, name + ".dxf"), rename.get(name, name), rotated,
                            margin + x + spacing / 2.0, margin + y + spacing / 2.0,
-                           doc, part_label[name], label_layer)
+                           doc, part_label[name], label_layer, cut_layer)
         out = os.path.join(out_dir, f"sheet_{b + 1:02d}.dxf")
         doc.saveas(out); sheet_files.append(out)
         print(f"  sheet_{b + 1:02d}.dxf : {len(by_bin[b])} parts")

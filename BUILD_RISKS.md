@@ -9,9 +9,20 @@ walks — *before* cutting the other five. Every item below is far cheaper to fi
 
 ---
 
+## ✅ Fixed in the pipeline (commit history)
+- **R1 (sheet size):** re-nested to **1200 × 1200 mm** (Snijlab birch stock).
+- **R2 (colours/format):** cut → blue `cut` layer RGB(0,0,255); labels → red `line engraving` layer
+  RGB(255,0,0); label text converted to **outline polylines** (no TEXT); saved as **DXF R2004**, mm.
+- **R3 (kerf):** `kerf_mm` (default 0.2) now shrinks every hole by one kerf — still confirm the exact
+  value with a fit-test coupon.
+
+Everything below R3 is still open (design/process decisions).
+
+---
+
 ## 🔴 High severity — fix before cutting
 
-### R1. Sheet size doesn't match Snijlab's material/bed
+### R1. Sheet size doesn't match Snijlab's material/bed  — ✅ done (re-nested 1200×1200)
 - **Evidence:** we nest onto **2440 × 1220 mm**. Snijlab's birch plywood comes on **1200 × 1200 mm**
   sheets; their standard laser bed is **1200 × 600**, large-format up to **2400 × 1200**. Our sheet
   is bigger than *all* of those (even 40 mm over the large-format bed).
