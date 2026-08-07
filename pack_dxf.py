@@ -69,9 +69,70 @@ def fits(pw, ph, uw, uh, rot):
     return (pw <= uw and ph <= uh) or (rot and ph <= uw and pw <= uh)
 
 
+# ---------- outline hull (wrap the outline around oversized features) ----------
+
+def _convex_hull(points):
+    pts = sorted(set((round(x, 3), round(y, 3)) for x, y in points))
+    if len(pts) <= 2:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    lower = []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    upper = []
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def _apply_hull(msp, big_r):
+    """Replace the outline with the convex hull of the outline + any circle bigger than big_r
+    (so an oversized feature like a wide hub is wrapped by the outline instead of poking out).
+    Small holes are left as holes; big circles stay as holes inside the new hull."""
+    pts = []
+    for e in msp:
+        t = e.dxftype()
+        if t == "LWPOLYLINE":
+            pts += [(p[0], p[1]) for p in e.get_points("xy")]
+        elif t == "LINE":
+            pts += [(e.dxf.start.x, e.dxf.start.y), (e.dxf.end.x, e.dxf.end.y)]
+        elif t in ("ARC", "SPLINE"):
+            try:
+                pts += [(p.x, p.y) for p in ezpath.make_path(e).flattening(1.0)]
+            except Exception:
+                pass
+    for c in msp.query("CIRCLE"):
+        if c.dxf.radius > big_r:
+            cx, cy, r = c.dxf.center.x, c.dxf.center.y, c.dxf.radius
+            pts += [(cx + r * math.cos(2 * math.pi * k / 48),
+                     cy + r * math.sin(2 * math.pi * k / 48)) for k in range(48)]
+    hull = _convex_hull(pts)
+    if len(hull) < 3:
+        return
+    for e in list(msp):
+        if e.dxftype() in ("LWPOLYLINE", "LINE", "ARC", "SPLINE"):
+            msp.delete_entity(e)
+    msp.add_lwpolyline(hull, close=True)
+    # The oversized hub feature is now wrapped by the outline; it was never a real cut.
+    # Replace each wrapped circle with a through-hole placeholder (src_dia) at its centre so the
+    # normal hole machinery sizes it by its role (e.g. the crankshaft's friction fit).
+    for c in list(msp.query("CIRCLE")):
+        if c.dxf.radius > big_r:
+            cx, cy = c.dxf.center.x, c.dxf.center.y
+            msp.delete_entity(c)
+            msp.add_circle((cx, cy), big_r / 2.0)
+
+
 # ---------- hole sizing (per-hole overrides win over per-part) ----------
 
-def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol):
+def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol, hull=False):
     doc = ezdxf.readfile(infile)
     doc.units = ezdxf.units.MM
     msp = doc.modelspace()
@@ -83,6 +144,8 @@ def process_part(infile, outfile, scale, default_dia, per_hole, src_dia, tol):
             msp.delete_entity(c)
         else:
             seen.add(key)
+    if hull:
+        _apply_hull(msp, big_r=src_dia)   # wrap outline around features bigger than a hole
     # snapshot each circle's ORIGINAL centre + radius so we can (a) match per-hole overrides and
     # (b) resize ONLY the through-holes (dia == src_dia), leaving other circles (e.g. the crank's
     # 25mm hole, or any non-hole feature) as scaled outline.
@@ -250,6 +313,10 @@ def main():
 
     parts_dir = P(cfg["parts_dir"])
     manifest = read_manifest(P(cfg["manifest"]))
+    for pname, q in cfg.get("qty_override", {}).items():   # e.g. a spare crank -> 2 per kit
+        if pname in manifest:
+            manifest[pname]["per_kit"] = int(q)
+    hull_parts = set(cfg.get("hull_parts", []))
     hole_roles = read_hole_roles(os.path.join(parts_dir, "hole_roles.csv"))
     proc_dir = P(cfg["processed_dir"]); os.makedirs(proc_dir, exist_ok=True)
     out_dir = P(cfg["out_dir"]); os.makedirs(out_dir, exist_ok=True)
@@ -281,7 +348,8 @@ def main():
         # per-hole centres are matched in original (pre-scale) model coords inside process_part
         per_hole = hole_roles.get(name, [])
         outfile = os.path.join(proc_dir, name + ".dxf")
-        w, h = process_part(infile, outfile, scale, default_dia, per_hole, src_dia, src_tol)
+        w, h = process_part(infile, outfile, scale, default_dia, per_hole, src_dia, src_tol,
+                            hull=(name in hull_parts))
         part_dims[name] = (w, h)
         lbl = compute_label(outfile, rename.get(name, name), label_cap) if label_cap > 0 else None
         part_label[name] = lbl

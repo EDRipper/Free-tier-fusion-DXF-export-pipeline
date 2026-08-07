@@ -1,5 +1,5 @@
 CUT PARTS,per_kit,kits,total,hole_mm,notes
-crank,1,6,6,per-hole,"3mm(model), x6.0"
+crank,2,6,12,per-hole,"3mm(model), x6.0"
 driving gear,3,6,18,per-hole,"5mm(model), x6.0"
 driven gear,3,6,18,per-hole,"5mm(model), x6.0"
 frame spacer,2,6,12,per-hole,"3mm(model), x6.0"

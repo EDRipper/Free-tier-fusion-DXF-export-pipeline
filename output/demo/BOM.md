@@ -31,8 +31,7 @@ everything else to **cut**. One whole beest on one sheet: `../nested_1kit/`.
 ## Hole roles — two sizes only
 - **22 mm** (608 bearing seat): every leg-link pivot hole · frame-spacer crankshaft hole · spacer bearing hole
 - **8 mm** (M8 rod, friction/press): frame-spacer's two fixed-shaft holes · spacer friction hole ·
-  gear centres · driven-gear crank pin · crank handle
-- crank's 25 mm hole preserved as-is (not a pivot)
+  gear centres · driven-gear crank pin · crank handle · crank crankshaft mount (friction on 8 mm rod)
 
 Everything runs on **one bearing (608) and one rod/bolt size (8 mm / M8)** — the simplest possible kit.
 
