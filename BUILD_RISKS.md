@@ -15,8 +15,13 @@ walks — *before* cutting the other five. Every item below is far cheaper to fi
   RGB(255,0,0); label text converted to **outline polylines** (no TEXT); saved as **DXF R2004**, mm.
 - **R3 (kerf):** `kerf_mm` (default 0.2) now shrinks every hole by one kerf — still confirm the exact
   value with a fit-test coupon.
+- **R4 (bearings):** dropped to **crankshaft-only** — 606 → **30** bearings. Leg pivots are now M8
+  bolt + nylon washer in **9 mm clearance holes** (friction math: ~0.4 kgf at the crank). Saves ~€215
+  and removes the plywood-bearing-retention problem entirely.
+- **R8 (Component19):** confirmed by the user — "Links h,i,g" **is one physical part**. ✅ (Gear-mesh
+  spacing still worth an eyeball in the assembly.)
 
-Everything below R3 is still open (design/process decisions).
+Remaining open items are design/process decisions (R5 prototype, R6 doubling, R7 friction, R9–R13).
 
 ---
 
