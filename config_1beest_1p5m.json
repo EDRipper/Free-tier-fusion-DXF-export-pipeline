@@ -25,11 +25,12 @@
   "hull_parts": ["crank"],
   "qty_override": { "crank": 1, "LinkE": 12, "LinkJ": 12, "LinkK": 12, "Component19": 12 },
   "hardware_per_kit": {
-    "608ZZ bearing (8x22x7) - crankshaft supports only": 5,
+    "6900ZZ bearing (10x22x6) - central crankshaft supports (22mm seat = same as 608)": 5,
+    "10mm steel rod - central crankshaft (driven gear keyed to it)": 2,
     "M8 bolt 30-50mm - leg pivot pins (links pivot on the shank, 9mm clearance holes)": 45,
     "M8 nyloc nut": 45,
     "nylon washer/spacer M8 - between every pivoting face": 120,
-    "8mm steel rod - crankshaft + crank pins + fixed shafts + handle (cut to length)": 8,
+    "8mm steel rod - 2 side fixed shafts + crank pins + gear/fixed fits + handle (cut to length)": 8,
     "crank handle (cut part)": 1
   }
 }

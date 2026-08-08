@@ -16,9 +16,10 @@ LinkJ,12,1,12,9,"3mm(model), x9.0"
 SHEETS,,,7,,1200x1200mm
 
 HARDWARE,per_kit,kits,total,,
-608ZZ bearing (8x22x7) - crankshaft supports only,5,1,5,,
+6900ZZ bearing (10x22x6) - central crankshaft supports (22mm seat = same as 608),5,1,5,,
+10mm steel rod - central crankshaft (driven gear keyed to it),2,1,2,,
 "M8 bolt 30-50mm - leg pivot pins (links pivot on the shank, 9mm clearance holes)",45,1,45,,
 M8 nyloc nut,45,1,45,,
 nylon washer/spacer M8 - between every pivoting face,120,1,120,,
-8mm steel rod - crankshaft + crank pins + fixed shafts + handle (cut to length),8,1,8,,
+8mm steel rod - 2 side fixed shafts + crank pins + gear/fixed fits + handle (cut to length),8,1,8,,
 crank handle (cut part),1,1,1,,
