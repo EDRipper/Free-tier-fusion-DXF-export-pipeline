@@ -27,9 +27,14 @@ kits you have to:
 4. **nest** the parts onto plywood sheets and **label** each one,
 5. spit out a **shopping list**.
 
-That's this repo, end to end. Output in [`output/demo/`](output/demo): six laser-ready sheets (cut on
-[Snijlab](https://snijlab.nl)) + a [BOM with purchase links](output/demo/BOM.md). One team's worth of
-parts (a whole beest on one sheet) is in [`nested_1kit/`](nested_1kit).
+That's this repo, end to end. Everything is Snijlab-ready (cut on [Snijlab](https://snijlab.nl):
+blue = cut, red = engrave, 1200×1200 mm, DXF R2004, kerf-compensated).
+
+**One complete beest** (start here) → [`nested_1kit/`](nested_1kit): three sheets,
+[sheet_01](nested_1kit/sheet_01.dxf) · [sheet_02](nested_1kit/sheet_02.dxf) · [sheet_03](nested_1kit/sheet_03.dxf).
+
+**All six kits** → [`output/demo/`](output/demo): 13 laser-ready sheets + a
+[BOM with purchase links](output/demo/BOM.md). Read [`BUILD_RISKS.md`](BUILD_RISKS.md) before cutting.
 
 ### How the beest maps to the pipeline
 | | |
@@ -81,9 +86,10 @@ No Fusion? `py make_test_parts.py && py pack_dxf.py` runs it on synthetic parts.
   13 mm whether the beest is knee- or waist-height. `hole_roles.csv` assigns bearing vs friction per hole.
 
 ## After nesting
-- `nested/sheet_XX.dxf` → laser/CNC. Set the `LABEL` layer to **score/engrave**, everything else to cut.
+- Sheets are Snijlab-ready: **blue** (layer `cut`, RGB 0,0,255) = cut through, **red** (layer
+  `line engraving`, RGB 255,0,0) = engrave. Check the uploader preview matches before paying.
 - Push `parts_processed/*.dxf` through **Deepnest** for tighter true-shape nesting if you want fewer sheets.
-- **Cut a fit-test coupon first** to dial in kerf before committing all kits.
+- **Cut a fit-test coupon + one prototype beest first** to dial in kerf before committing all kits.
 
 ## Files
 - `fusion_export_dxf.py` — Stage A (runs in Fusion). · `fusion_walk_frames.py` — captures the walk animation.
