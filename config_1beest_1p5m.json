@@ -23,7 +23,7 @@
     "Component19": "Links h,i,g"
   },
   "hull_parts": ["crank"],
-  "qty_override": { "crank": 1 },
+  "qty_override": { "crank": 1, "LinkE": 12, "LinkJ": 12, "LinkK": 12, "Component19": 12 },
   "hardware_per_kit": {
     "608ZZ bearing (8x22x7) - crankshaft supports only": 5,
     "M8 bolt 30-50mm - leg pivot pins (links pivot on the shank, 9mm clearance holes)": 45,
