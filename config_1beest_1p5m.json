@@ -1,0 +1,35 @@
+{
+  "parts_dir": "parts_raw",
+  "manifest": "parts_raw/parts_manifest.csv",
+  "processed_dir": "parts_processed_1p5m",
+  "out_dir": "nested_1beest_1p5m",
+  "scale": 9.0,
+  "kits": 1,
+  "sheet_w_mm": 1200,
+  "sheet_h_mm": 1200,
+  "part_spacing_mm": 8,
+  "sheet_margin_mm": 15,
+  "allow_rotate": true,
+  "label_height_mm": 16,
+  "label_layer": "line engraving",
+  "cut_layer": "cut",
+  "hole_source_dia_mm": 4.0,
+  "hole_source_tol_mm": 0.6,
+  "kerf_mm": 0.2,
+  "default_hole_mm": 9.0,
+  "part_hole_overrides": {},
+  "rename": {
+    "Spur Gear 12 teeth": "driven gear",
+    "Component19": "Links h,i,g"
+  },
+  "hull_parts": ["crank"],
+  "qty_override": { "crank": 1 },
+  "hardware_per_kit": {
+    "608ZZ bearing (8x22x7) - crankshaft supports only": 5,
+    "M8 bolt 30-50mm - leg pivot pins (links pivot on the shank, 9mm clearance holes)": 45,
+    "M8 nyloc nut": 45,
+    "nylon washer/spacer M8 - between every pivoting face": 120,
+    "8mm steel rod - crankshaft + crank pins + fixed shafts + handle (cut to length)": 8,
+    "crank handle (cut part)": 1
+  }
+}
