@@ -15,7 +15,7 @@
   "cut_layer": "cut",
   "hole_source_dia_mm": 4.0,
   "hole_source_tol_mm": 0.6,
-  "kerf_mm": 0.2,
+  "kerf_mm": 0.0,
   "default_hole_mm": 9.0,
   "part_hole_overrides": {},
   "rename": {
